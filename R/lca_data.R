@@ -15,56 +15,57 @@
 
 lca_data <- function(flusso_asa, flusso_farmaci, flusso_sdo){
 
-  dd <- full_join(flusso_asa, flusso_farmaci, by = 'ID_PAZIENTE')
+  dd <- full_join(flusso_asa, flusso_farmaci, by = 'id_paziente')
 
   catc <- dd %>%
-    group_by(ID_PAZIENTE, ATC) %>%
+    group_by(id_paziente, atc) %>%
     summarise(ncodact = n()) %>%
     ungroup() %>%
     dplyr::select(-ncodact) %>%
-    group_by(ID_PAZIENTE) %>%
+    group_by(id_paziente) %>%
     mutate(count=1:n())
 
 
-  atc <- spread(catc, count, ATC)
+  datc <- spread(catc, count, atc)
 
 
   prest <- dd %>%
-    group_by(ID_PAZIENTE, PRESTAZ) %>%
+    group_by(id_paziente, prestaz) %>%
     summarise(nprest = n()) %>%
     ungroup() %>%
     dplyr::select(-nprest) %>%
-    group_by(ID_PAZIENTE) %>%
+    group_by(id_paziente) %>%
     mutate(count=1:n())
 
-  prest <- spread(prest, count, PRESTAZ)
+  prest <- spread(prest, count, prestaz)
 
   my_na <- function(x){
     ifelse(is.na(x),'no',x)
   }
 
 
-  act_prest <- full_join(prest,atc, by = 'ID_PAZIENTE')
+  act_prest <- full_join(prest,datc, by = 'id_paziente')
   act_prest <- act_prest %>%
     mutate_all(my_na)
 
-  n_prest <- length(unique(prest$PRESTAZ))
-  n_act <- length(unique(act$ATC))
+  n_prest <- ncol(prest)-1
+  
+  n_act <- ncol(datc)-1
 
   names(act_prest)[2:(n_prest+1)] <- paste0('prest_',1:n_prest)
   names(act_prest)[(n_prest + 2): (n_prest + 1 + n_act)] <- paste0('act_',1:n_act)
 
-  act_prest <- full_join(act_prest, flusso_sdo, by = 'ID_PAZIENTE')
+  act_prest <- full_join(act_prest, flusso_sdo, by = 'id_paziente')
 
 
   temp <- flusso_asa %>%
-    dplyr::select(ID_PAZIENTE, chemio_s, radio_s) %>%
-    filter(ID_PAZIENTE%in%act_prest$ID_PAZIENTE) %>%
+    dplyr::select(id_paziente, chemio_s, radio_s) %>%
+    filter(id_paziente%in%act_prest$id_paziente) %>%
     unique()%>%
-    group_by(keyone) %>%
+    group_by(id_paziente) %>%
     summarise(chemios=sum(chemio_s), radios=sum(radio_s))
 
-  temp2 <- inner_join(act_prest, temp, by = 'ID_PAZIENTE')
+  temp2 <- inner_join(act_prest, temp, by = 'id_paziente')
   temp2 <- temp2 %>%
     mutate(chemio_1 = sum(chemio, chemios, na.rm=T),
            radio_1 = sum(radio, radios, na.rm = T))
@@ -85,11 +86,12 @@ lca_data <- function(flusso_asa, flusso_farmaci, flusso_sdo){
 
   lca$act_1 <- factor(lca$act_1, labels = 1:length(unique(lca$act_1)))
   lca$act_2 <- factor(lca$act_2, labels = 1:length(unique(lca$act_2)))
-  lca$act_3 <- factor(lca$act_3, labels = 1:length(unique(lca$act_3)))
-  lca$act_4 <- factor(lca$act_4, labels = 1:length(unique(lca$act_4)))
+  # lca$act_3 <- factor(lca$act_3, labels = 1:length(unique(lca$act_3)))
+  # lca$act_4 <- factor(lca$act_4, labels = 1:length(unique(lca$act_4)))
 
 
-  lca$intervento = factor(lca$intervento, labels=c(0,1))
+  labs <- unique(lca$intervento)[!is.na(unique(lca$intervento))]
+  lca$intervento = factor(lca$intervento, labels=labs)
 
   lca <- lca %>%
     mutate(chemio = ifelse(chemio_1 >1, 1, chemio_1),

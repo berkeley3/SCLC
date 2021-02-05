@@ -14,12 +14,12 @@
 
 select_sdo <- function(flusso_sdo){
   dat <- flusso_sdo %>%
-    mutate(intervento_p = str_trunc(as.character(COD_INT_principale), 2, 'right', ellipsis = ''),
-           intervento_1 = str_trunc(as.character(COD_INT_secondario_1), 2, 'right', ellipsis = ''),
-           intervento_2 = str_trunc(as.character(COD_INT_secondario_2), 2, 'right', ellipsis = ''),
-           intervento_3 = str_trunc(as.character(COD_INT_secondario_3), 2, 'right', ellipsis = ''),
-           intervento_4 = str_trunc(as.character(COD_INT_secondario_4), 2, 'right', ellipsis = ''),
-           intervento_5 = str_trunc(as.character(COD_INT_secondario_5), 2, 'right', ellipsis = '')) %>%
+    mutate(intervento_p = str_trunc(as.character(cod_int_principale), 2, 'right', ellipsis = ''),
+           intervento_1 = str_trunc(as.character(cod_int_secondario_1), 2, 'right', ellipsis = ''),
+           intervento_2 = str_trunc(as.character(cod_int_secondario_2), 2, 'right', ellipsis = ''),
+           intervento_3 = str_trunc(as.character(cod_int_secondario_3), 2, 'right', ellipsis = ''),
+           intervento_4 = str_trunc(as.character(cod_int_secondario_4), 2, 'right', ellipsis = ''),
+           intervento_5 = str_trunc(as.character(cod_int_secondario_5), 2, 'right', ellipsis = '')) %>%
     mutate_at(vars(intervento_p, intervento_1, intervento_2, intervento_3, intervento_4, intervento_5), as.numeric) %>%
     filter(intervento_p>31 & intervento_p < 35 |
              intervento_1>31 & intervento_1 < 35 |

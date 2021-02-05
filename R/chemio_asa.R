@@ -14,8 +14,11 @@
 
 chemio_asa <- function(flusso_specialistica){
   dat <- flusso_specialistica %>%
-    mutate(chemio_s = ifelse( prestazione == '99.25' | prestazione == '99.25.4' |
-                                prestazione == '99.25.5',1,0))
+    mutate(chemio_s = ifelse( prestaz == '99.25' |
+                                prestaz == '99.25.4' |
+                                prestaz == '99.25.5'|
+                                prestaz == '992501' |
+                                prestaz == '8901F0' ,1,0))
 
 
   dat
